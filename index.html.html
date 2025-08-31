@@ -1,0 +1,249 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tic Tac Toe — O starts</title>
+  <style>
+    :root {
+      --bg: #0e0f13;
+      --panel: #171923;
+      --accent: #7dd3fc;
+      --accent-2: #c084fc;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --win: #22c55e;
+      --lose: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; display: grid; place-items: center; min-height: 100vh;
+      background: radial-gradient(1200px 600px at 50% -10%, #1f2937 0%, var(--bg) 50%);
+      color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+
+    .wrap {
+      width: min(92vw, 520px);
+      display: grid; gap: 14px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px; padding: 16px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: .2px; }
+    .sub { color: var(--muted); font-size: 13px; }
+
+    .status-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
+    .btn {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(125, 211, 252, .18), rgba(192, 132, 252, .18));
+      color: var(--text); padding: 10px 14px; border-radius: 12px; cursor: pointer;
+      font-weight: 600; letter-spacing: .3px; transition: transform .08s ease, filter .15s ease;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:active { transform: translateY(1px) scale(0.99); }
+
+    .board {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 6px; border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .cell {
+      position: relative; aspect-ratio: 1 / 1; font-size: clamp(48px, 11vw, 72px); font-weight: 800;
+      display: grid; place-items: center; cursor: pointer; border-radius: 16px;
+      background: radial-gradient(220px 120px at 50% -30%, rgba(125,211,252,.25), rgba(192,132,252,.15) 60%, rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 6px 18px rgba(0,0,0,.35);
+      transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+    }
+    .cell:hover { filter: brightness(1.07); }
+    .cell:active { transform: scale(0.98); }
+    .cell[disabled] { cursor: not-allowed; opacity: .75; }
+
+    .mark-O { text-shadow: 0 0 18px rgba(125, 211, 252, .65); color: #9ae6ff; }
+    .mark-X { text-shadow: 0 0 18px rgba(192, 132, 252, .65); color: #e9d5ff; }
+
+    .status {
+      font-size: 16px; font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    .ribbon { font-size: 13px; color: var(--muted); }
+
+    .score {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px;
+      text-align: center; font-size: 13px;
+    }
+    .score .pill {
+      padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+    }
+    .pill strong { display: block; font-size: 18px; margin-top: 2px; }
+
+    .win { outline: 3px solid var(--win); box-shadow: 0 0 0 3px rgba(34,197,94,.25), inset 0 0 30px rgba(34,197,94,.35); }
+    .draw { outline: 3px solid #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.25); }
+
+    footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="status-row">
+        <h1>⭕ Tic‑Tac‑Toe — O always starts</h1>
+        <button id="resetBtn" class="btn" aria-label="Reset the board">New Round</button>
+      </div>
+      <div class="sub" id="subtitle">Two players, one laptop. Click any box to place your mark.</div>
+    </div>
+
+    <div class="card">
+      <div id="status" class="status" aria-live="polite">Turn: O</div>
+      <div id="board" class="board" role="grid" aria-label="Tic Tac Toe board">
+        <!-- 9 cells -->
+      </div>
+      <div class="score" aria-label="Scoreboard">
+        <div class="pill">O Wins<strong id="oScore">0</strong></div>
+        <div class="pill">Draws<strong id="dScore">0</strong></div>
+        <div class="pill">X Wins<strong id="xScore">0</strong></div>
+      </div>
+    </div>
+
+    <footer>Pro tip: Press <kbd>R</kbd> to start a new round. O always serves first.</footer>
+  </div>
+
+  <script>
+    (function () {
+      const boardEl = document.getElementById('board');
+      const statusEl = document.getElementById('status');
+      const resetBtn = document.getElementById('resetBtn');
+      const oScoreEl = document.getElementById('oScore');
+      const xScoreEl = document.getElementById('xScore');
+      const dScoreEl = document.getElementById('dScore');
+
+      const LINES = [
+        [0,1,2],[3,4,5],[6,7,8], // rows
+        [0,3,6],[1,4,7],[2,5,8], // cols
+        [0,4,8],[2,4,6]          // diagonals
+      ];
+
+      let state, current, over;
+      let scores = { O: 0, X: 0, D: 0 };
+
+      function initBoard() {
+        boardEl.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+          const btn = document.createElement('button');
+          btn.className = 'cell';
+          btn.setAttribute('role', 'gridcell');
+          btn.setAttribute('aria-label', 'Empty');
+          btn.dataset.index = i;
+          btn.addEventListener('click', onCellClick, { passive: true });
+          boardEl.appendChild(btn);
+        }
+      }
+
+      function reset(roundOnly = true) {
+        state = Array(9).fill('');
+        current = 'O'; // O always starts
+        over = false;
+        for (const cell of boardEl.children) {
+          cell.textContent = '';
+          cell.classList.remove('win','draw','mark-O','mark-X');
+          cell.disabled = false;
+          cell.setAttribute('aria-label', 'Empty');
+        }
+        updateStatus();
+        if (!roundOnly) { scores = { O: 0, X: 0, D: 0 }; updateScore(); }
+      }
+
+      function onCellClick(e) {
+        if (over) return; // game already finished
+        const cell = e.currentTarget;
+        const idx = +cell.dataset.index;
+        if (state[idx]) return; // ignore if occupied
+
+        state[idx] = current;
+        cell.textContent = current;
+        cell.classList.add(current === 'O' ? 'mark-O' : 'mark-X');
+        cell.setAttribute('aria-label', current);
+
+        const winner = getWinner();
+        if (winner) {
+          endGame(winner);
+          return;
+        }
+
+        if (state.every(Boolean)) {
+          endGame('D');
+          return;
+        }
+
+        // switch turns
+        current = current === 'O' ? 'X' : 'O';
+        updateStatus();
+      }
+
+      function getWinner() {
+        for (const [a,b,c] of LINES) {
+          if (state[a] && state[a] === state[b] && state[a] === state[c]) {
+            highlightWin([a,b,c]);
+            return state[a];
+          }
+        }
+        return null;
+      }
+
+      function highlightWin(cells) {
+        for (const idx of cells) {
+          boardEl.children[idx].classList.add('win');
+        }
+      }
+
+      function endGame(result) {
+        over = true;
+        // disable remaining cells
+        for (const cell of boardEl.children) cell.disabled = true;
+
+        if (result === 'D') {
+          for (const cell of boardEl.children) cell.classList.add('draw');
+          statusEl.textContent = "It's a draw. Press New Round.";
+          scores.D++;
+        } else {
+          statusEl.textContent = `${result} wins! Press New Round.`;
+          scores[result]++;
+        }
+        updateScore();
+      }
+
+      function updateStatus() {
+        statusEl.textContent = `Turn: ${current}`;
+      }
+
+      function updateScore() {
+        oScoreEl.textContent = scores.O;
+        xScoreEl.textContent = scores.X;
+        dScoreEl.textContent = scores.D;
+      }
+
+      // Keyboard shortcut: R to reset round
+      window.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'r') reset();
+      });
+
+      resetBtn.addEventListener('click', () => reset());
+
+      // Bootstrap
+      initBoard();
+      reset();
+    })();
+  </script>
+</body>
+</html>
